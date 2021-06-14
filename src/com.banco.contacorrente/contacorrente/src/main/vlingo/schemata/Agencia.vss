@@ -1,0 +1,5 @@
+data Agencia {
+  version semanticVersion
+  int Numero
+  string Nome
+}

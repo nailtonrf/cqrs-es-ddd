@@ -1,0 +1,6 @@
+event LimiteCreditoAlterado {
+  version semanticVersion
+  string id
+  banco:contacorrente:creditorotativo:NumeroConta:1.0.0 ContaCorrente
+  double Valor
+}

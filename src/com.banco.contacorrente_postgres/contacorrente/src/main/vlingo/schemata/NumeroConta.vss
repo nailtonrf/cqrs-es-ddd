@@ -1,0 +1,5 @@
+data NumeroConta {
+  version semanticVersion
+  int Numero
+  banco:contacorrente:creditorotativo:Agencia:1.0.0 Agencia
+}

@@ -1,0 +1,254 @@
+{
+  "context": {
+    "groupId": "com.banco",
+    "artifactId": "contacorrente",
+    "artifactVersion": "1.0.0",
+    "packageName": "com.banco.contacorrente"
+  },
+  "model": {
+    "persistenceSettings": {
+      "storageType": "STATE_STORE",
+      "useCQRS": false,
+      "projections": "NONE",
+      "database": "POSTGRES",
+      "commandModelDatabase": "IN_MEMORY",
+      "queryModelDatabase": "IN_MEMORY"
+    },
+    "aggregateSettings": [
+      {
+        "api": {
+          "rootPath": "/",
+          "routes": []
+        },
+        "aggregateName": "CreditoRotativo",
+        "stateFields": [
+          {
+            "name": "id",
+            "type": "String"
+          },
+          {
+            "name": "ContaCorrente",
+            "type": "NumeroConta",
+            "collectionType": ""
+          },
+          {
+            "name": "Valor",
+            "type": "double",
+            "collectionType": ""
+          }
+        ],
+        "methods": [
+          {
+            "name": "AumentarLimiteCredito",
+            "parameters": [
+              {
+                "stateField": "ContaCorrente",
+                "parameterName": "ContaCorrente",
+                "multiplicity": ""
+              },
+              {
+                "stateField": "Valor",
+                "parameterName": "Valor",
+                "multiplicity": ""
+              }
+            ],
+            "useFactory": false,
+            "event": "LimiteCreditoAlterado"
+          }
+        ],
+        "events": [
+          {
+            "name": "LimiteCreditoAlterado",
+            "fields": [
+              "id",
+              "ContaCorrente",
+              "Valor"
+            ]
+          }
+        ],
+        "consumerExchange": {
+          "exchangeName": "",
+          "receivers": []
+        },
+        "producerExchange": {
+          "exchangeName": "limitealterado-topic",
+          "schemaGroup": "banco:contacorrente:creditorotativo",
+          "outgoingEvents": [
+            "LimiteCreditoAlterado"
+          ]
+        }
+      },
+      {
+        "api": {
+          "rootPath": "/",
+          "routes": []
+        },
+        "aggregateName": "ContaCorrente",
+        "stateFields": [
+          {
+            "name": "id",
+            "type": "String"
+          },
+          {
+            "name": "Numero",
+            "type": "NumeroConta",
+            "collectionType": ""
+          },
+          {
+            "name": "LimiteCredito",
+            "type": "double",
+            "collectionType": ""
+          },
+          {
+            "name": "Bloqueada",
+            "type": "boolean",
+            "collectionType": ""
+          }
+        ],
+        "methods": [
+          {
+            "name": "CriarContaCorrente",
+            "parameters": [
+              {
+                "stateField": "Numero",
+                "parameterName": "Numero",
+                "multiplicity": ""
+              },
+              {
+                "stateField": "LimiteCredito",
+                "parameterName": "LimiteCredito",
+                "multiplicity": ""
+              }
+            ],
+            "useFactory": true,
+            "event": "ContaCorrenteCriada"
+          },
+          {
+            "name": "BloquearContaCorrente",
+            "parameters": [
+              {
+                "stateField": "Numero",
+                "parameterName": "Numero",
+                "multiplicity": ""
+              }
+            ],
+            "useFactory": false,
+            "event": "ContaCorrenteBloqueada"
+          },
+          {
+            "name": "DesbloquearContaCorrente",
+            "parameters": [
+              {
+                "stateField": "Numero",
+                "parameterName": "Numero",
+                "multiplicity": ""
+              }
+            ],
+            "useFactory": false,
+            "event": "ContaCorrenteDesbloqueada"
+          },
+          {
+            "name": "AtualizarLimiteCreditoRotativo",
+            "parameters": [
+              {
+                "stateField": "Numero",
+                "parameterName": "Numero",
+                "multiplicity": ""
+              },
+              {
+                "stateField": "LimiteCredito",
+                "parameterName": "LimiteCredito",
+                "multiplicity": ""
+              }
+            ],
+            "useFactory": false
+          }
+        ],
+        "events": [
+          {
+            "name": "ContaCorrenteBloqueada",
+            "fields": [
+              "id",
+              "Numero"
+            ]
+          },
+          {
+            "name": "ContaCorrenteDesbloqueada",
+            "fields": [
+              "id",
+              "Numero"
+            ]
+          },
+          {
+            "name": "ContaCorrenteCriada",
+            "fields": [
+              "id",
+              "Numero"
+            ]
+          }
+        ],
+        "consumerExchange": {
+          "exchangeName": "contacorrente-topic",
+          "receivers": [
+            {
+              "schema": "banco:contacorrente:creditorotativo:LimiteCreditoAlterado:1.0.0",
+              "aggregateMethod": "AtualizarLimiteCreditoRotativo"
+            }
+          ]
+        },
+        "producerExchange": {
+          "exchangeName": "",
+          "schemaGroup": "",
+          "outgoingEvents": []
+        }
+      }
+    ],
+    "valueObjectSettings": [
+      {
+        "name": "Agencia",
+        "fields": [
+          {
+            "name": "Numero",
+            "type": "int",
+            "collectionType": ""
+          },
+          {
+            "name": "Nome",
+            "type": "String",
+            "collectionType": ""
+          }
+        ]
+      },
+      {
+        "name": "NumeroConta",
+        "fields": [
+          {
+            "name": "Numero",
+            "type": "int",
+            "collectionType": ""
+          },
+          {
+            "name": "Agencia",
+            "type": "Agencia",
+            "collectionType": ""
+          }
+        ]
+      }
+    ]
+  },
+  "deployment": {
+    "type": "NONE",
+    "dockerImage": "",
+    "kubernetesImage": "",
+    "kubernetesPod": "",
+    "clusterTotalNodes": 3,
+    "clusterPort": 8021,
+    "producerExchangePort": 8011,
+    "httpServerPort": 8005
+  },
+  "projectDirectory": "/designer/VLINGO-XOOM/com.banco/contacorrente1",
+  "useAnnotations": true,
+  "useAutoDispatch": true,
+  "generateUIWith": "ReactJS",
+  "generateUI": true
+}
